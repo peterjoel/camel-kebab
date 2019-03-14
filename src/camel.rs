@@ -1,4 +1,5 @@
-use crate::internals::{split_words_on_uppercase, write_pascal_case, Case, CaseValue, Word};
+use crate::internals::{self, split_words_on_uppercase, write_pascal_case, CaseValue, Word};
+use crate::Case;
 use std::fmt;
 
 #[derive(Debug, Clone)]
@@ -18,14 +19,16 @@ impl<'a> Case<'a> for CamelCase<'a> {
     fn str_as_case_unchecked(source: &'a str) -> Self {
         CamelCase(CaseValue::Joined(source))
     }
+}
 
+impl<'a> internals::Case<'a> for CamelCase<'a> {
     #[inline]
-    fn from_words(words: Vec<Word<'a>>) -> Self {
+    fn from_cased_words(words: Vec<Word<'a>>) -> Self {
         CamelCase(CaseValue::Words(words))
     }
 
     #[inline]
-    fn to_words(self) -> Vec<Word<'a>> {
+    fn to_cased_words(self) -> Vec<Word<'a>> {
         match self.0 {
             CaseValue::Words(words) => words,
             CaseValue::Joined(string) => {

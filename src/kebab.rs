@@ -1,4 +1,5 @@
-use crate::internals::{is_lower_case_delimited, write_lower_delimited, Case, CaseValue, Word};
+use crate::internals::{is_lower_case_delimited, self, write_lower_delimited, CaseValue, Word};
+use crate::Case;
 use std::fmt;
 
 #[derive(Debug, Clone)]
@@ -14,14 +15,16 @@ impl<'a> Case<'a> for KebabCase<'a> {
     fn str_as_case_unchecked(source: &'a str) -> Self {
         KebabCase(CaseValue::Joined(source))
     }
+}
 
+impl<'a> internals::Case<'a> for KebabCase<'a> {
     #[inline]
-    fn from_words(words: Vec<Word<'a>>) -> Self {
+    fn from_cased_words(words: Vec<Word<'a>>) -> Self {
         KebabCase(CaseValue::Words(words))
     }
 
     #[inline]
-    fn to_words(self) -> Vec<Word<'a>> {
+    fn to_cased_words(self) -> Vec<Word<'a>> {
         match self.0 {
             CaseValue::Words(words) => words,
             CaseValue::Joined(string) => string.split('-').map(|w| Word::LowerCase(w)).collect(),

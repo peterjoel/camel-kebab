@@ -1,7 +1,6 @@
 #[macro_use]
 mod macros;
 mod internals;
-use internals::Case;
 mod camel;
 pub use camel::CamelCase;
 mod kebab;
@@ -10,6 +9,32 @@ mod snake;
 pub use snake::SnakeCase;
 mod pascal;
 pub use pascal::PascalCase;
+
+pub trait Case<'a>: internals::Case<'a> {
+    #[inline]
+    fn from_words<W>(words: W) -> Self 
+    where
+        W: IntoIterator<Item = &'a str>,
+    {
+        let words = words.into_iter()
+            .map(|word| internals::Word::MixedCase(word))
+            .collect();
+        Self::from_cased_words(words)
+    }
+
+    fn str_is_case(source: &str) -> bool;
+
+    #[inline]
+    fn str_as_case(source: &'a str) -> Option<Self> {
+        if Self::str_is_case(source) {
+            Some(Self::str_as_case_unchecked(source))
+        } else {
+            None
+        }
+    }
+
+    fn str_as_case_unchecked(source: &'a str) -> Self;
+}
 
 trait CaseExt {
     fn is_case<'a, C: Case<'a>>(&self) -> bool;

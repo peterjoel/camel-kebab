@@ -1,4 +1,5 @@
-use crate::internals::{split_words_on_uppercase, write_pascal_case, Case, CaseValue, Word};
+use crate::internals::{self, split_words_on_uppercase, write_pascal_case, CaseValue, Word};
+use crate::Case;
 use std::fmt;
 
 #[derive(Debug, Clone)]
@@ -18,14 +19,16 @@ impl<'a> Case<'a> for PascalCase<'a> {
     fn str_as_case_unchecked(source: &'a str) -> Self {
         PascalCase(CaseValue::Joined(source))
     }
+}
 
+impl<'a> internals::Case<'a> for PascalCase<'a> {
     #[inline]
-    fn from_words(words: Vec<Word<'a>>) -> Self {
+    fn from_cased_words(words: Vec<Word<'a>>) -> Self {
         PascalCase(CaseValue::Words(words))
     }
 
     #[inline]
-    fn to_words(self) -> Vec<Word<'a>> {
+    fn to_cased_words(self) -> Vec<Word<'a>> {
         match self.0 {
             CaseValue::Words(words) => words,
             CaseValue::Joined(string) => split_words_on_uppercase(string)

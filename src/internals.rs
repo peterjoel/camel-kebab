@@ -1,7 +1,7 @@
 use std::fmt;
 
 #[derive(Debug, Copy, Clone)]
-pub(crate) enum Word<'a> {
+pub enum Word<'a> {
     LowerCase(&'a str),
     MixedCase(&'a str),
     Capitalized(&'a str),
@@ -9,7 +9,7 @@ pub(crate) enum Word<'a> {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) enum CaseValue<'a> {
+pub enum CaseValue<'a> {
     Words(Vec<Word<'a>>),
     Joined(&'a str),
 }
@@ -56,23 +56,10 @@ impl<'a> Word<'a> {
     }
 }
 
-pub(crate) trait Case<'a>: Sized {
-    fn from_words(words: Vec<Word<'a>>) -> Self;
+pub trait Case<'a>: Sized {
+    fn from_cased_words(words: Vec<Word<'a>>) -> Self;
 
-    fn to_words(self) -> Vec<Word<'a>>;
-
-    fn str_is_case(source: &str) -> bool;
-
-    #[inline]
-    fn str_as_case(source: &'a str) -> Option<Self> {
-        if Self::str_is_case(source) {
-            Some(Self::str_as_case_unchecked(source))
-        } else {
-            None
-        }
-    }
-
-    fn str_as_case_unchecked(source: &'a str) -> Self;
+    fn to_cased_words(self) -> Vec<Word<'a>>;
 }
 
 #[inline]

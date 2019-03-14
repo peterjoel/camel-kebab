@@ -34,7 +34,8 @@ macro_rules! impl_from {
         $(
             impl<'a> std::convert::From<$from<'a>> for $to<'a> {
                 fn from(other: $from) -> $to {
-                    $to::from_words(other.to_words())
+                    use $crate::internals::Case;
+                    $to::from_cased_words(other.to_cased_words())
                 }
             }
         )+
