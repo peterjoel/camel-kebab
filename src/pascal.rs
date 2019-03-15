@@ -32,7 +32,7 @@ impl<'a> internals::Case<'a> for PascalCase<'a> {
         match self.0 {
             CaseValue::Words(words) => words,
             CaseValue::Joined(string) => split_words_on_uppercase(string)
-                .map(|w| Word::Capitalized(w))
+                .map(|w| Word::capitalized(w))
                 .collect(),
         }
     }

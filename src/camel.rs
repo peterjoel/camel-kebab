@@ -35,8 +35,8 @@ impl<'a> internals::Case<'a> for CamelCase<'a> {
                 let mut words = split_words_on_uppercase(&string);
                 let mut vec = Vec::new();
                 if let Some(first) = words.next() {
-                    vec.push(Word::LowerCase(first));
-                    vec.extend(words.map(|w| Word::Capitalized(w)));
+                    vec.push(Word::lower_case(first));
+                    vec.extend(words.map(|w| Word::capitalized(w)));
                 }
                 vec
             }

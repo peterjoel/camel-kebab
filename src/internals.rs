@@ -1,8 +1,12 @@
 use std::fmt;
 use std::iter::Peekable;
 
+
 #[derive(Debug, Copy, Clone)]
-pub enum Word<'a> {
+pub struct Word<'a>(WordInner<'a>);
+
+#[derive(Debug, Copy, Clone)]
+enum WordInner<'a> {
     LowerCase(&'a str),
     MixedCase(&'a str),
     Capitalized(&'a str),
@@ -16,12 +20,40 @@ pub enum CaseValue<'a> {
 }
 
 impl<'a> Word<'a> {
+    /// It is up to the caller to verify that the input is in the correct case
+    pub fn lower_case(input: &'a str) -> Word<'a> {
+        let word = Word(WordInner::LowerCase(input));
+        debug_assert!(word.is_valid());
+        word
+    }
+
+    /// It is up to the caller to verify that the input is in the correct case
+    pub fn upper_case(input: &'a str) -> Word<'a> {
+        let word = Word(WordInner::UpperCase(input));
+        debug_assert!(word.is_valid());
+        word
+    }
+
+    /// It is up to the caller to verify that the input is in the correct case
+    pub fn mixed_case(input: &'a str) -> Word<'a> {
+        let word = Word(WordInner::MixedCase(input));
+        debug_assert!(word.is_valid());
+        word
+    }
+
+    /// It is up to the caller to verify that the input is in the correct case
+    pub fn capitalized(input: &'a str) -> Word<'a> {
+        let word = Word(WordInner::Capitalized(input));
+        debug_assert!(word.is_valid());
+        word
+    }
+
     pub fn write_lowercase<W: fmt::Write>(&self, f: &mut W) -> Result<(), fmt::Error> {
         debug_assert!(self.is_valid());
-        match &self {
-            Word::LowerCase(word) => f.write_str(word),
-            Word::MixedCase(word) | Word::UpperCase(word) => write!(f, "{}", word.to_lowercase()),
-            Word::Capitalized(word) => {
+        match &self.0 {
+            WordInner::LowerCase(word) => f.write_str(word),
+            WordInner::MixedCase(word) | WordInner::UpperCase(word) => write!(f, "{}", word.to_lowercase()),
+            WordInner::Capitalized(word) => {
                 let mut chars = word.chars();
                 if let Some(first) = chars.next() {
                     write!(f, "{}", first.to_lowercase())?;
@@ -35,8 +67,8 @@ impl<'a> Word<'a> {
 
     pub fn write_capitalized<W: fmt::Write>(&self, f: &mut W) -> Result<(), fmt::Error> {
         debug_assert!(self.is_valid());
-        match &self {
-            Word::LowerCase(word) => {
+        match &self.0 {
+            WordInner::LowerCase(word) => {
                 let mut chars = word.chars();
                 if let Some(first) = chars.next() {
                     write!(f, "{}", first.to_uppercase())?;
@@ -45,7 +77,7 @@ impl<'a> Word<'a> {
                 }
                 Ok(())
             }
-            Word::MixedCase(word) | Word::UpperCase(word) => {
+            WordInner::MixedCase(word) | WordInner::UpperCase(word) => {
                 let mut chars = word.chars();
                 if let Some(first) = chars.next() {
                     write!(f, "{}", first.to_uppercase())?;
@@ -54,24 +86,24 @@ impl<'a> Word<'a> {
                 }
                 Ok(())
             }
-            Word::Capitalized(word) => f.write_str(word),
+            WordInner::Capitalized(word) => f.write_str(word),
         }
     }
 
     /// It is assumed that a Word is constructed with a string already in the correct case.
     /// However, this method is useful in debugging.
     pub fn is_valid(&self) -> bool {
-        match &self {
-            Word::LowerCase(word) => word.chars().all(|c| !c.is_uppercase()),
-            Word::MixedCase(_word) => true,
-            Word::UpperCase(word) => word.chars().all(|c| !c.is_lowercase()),
-            Word::Capitalized(word) => {
+        match &self.0 {
+            WordInner::LowerCase(word) => word.chars().all(|c| !c.is_uppercase()),
+            WordInner::MixedCase(_word) => true,
+            WordInner::UpperCase(word) => word.chars().all(|c| !c.is_lowercase()),
+            WordInner::Capitalized(word) => {
                 let mut chars = word.chars();
                 if let Some(first) = chars.next() {
                     if first.is_lowercase() {
                         false
                     } else {
-                        word.chars().all(|c| !c.is_uppercase())
+                        chars.all(|c| !c.is_uppercase())
                     }
                 } else {
                     true
@@ -294,11 +326,11 @@ mod tests {
         assert!(!is_lower_case_delimited("HELLO__THERE", '_'));
     }
 
-    fn upper_case() -> Word<'static> { Word::UpperCase("HELLO") }
-    fn lower_case() -> Word<'static> { Word::LowerCase("hello") }
-    fn capitalized() -> Word<'static> { Word::UpperCase("Hello") }
-    fn mixed_case1() -> Word<'static> { Word::UpperCase("hEllO") }
-    fn mixed_case2() -> Word<'static> { Word::UpperCase("HeLLo") }
+    fn upper_case() -> Word<'static> { Word::upper_case("HELLO") }
+    fn lower_case() -> Word<'static> { Word::lower_case("hello") }
+    fn capitalized() -> Word<'static> { Word::capitalized("Hello") }
+    fn mixed_case1() -> Word<'static> { Word::mixed_case("hEllO") }
+    fn mixed_case2() -> Word<'static> { Word::mixed_case("HeLLo") }
 
     #[test]
     fn test_word_write_capitalized() {

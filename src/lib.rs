@@ -17,7 +17,7 @@ pub trait Case<'a>: internals::Case<'a> {
         W: IntoIterator<Item = &'a str>,
     {
         let words = words.into_iter()
-            .map(|word| internals::Word::MixedCase(word))
+            .map(|word| internals::Word::mixed_case(word))
             .collect();
         Self::from_cased_words(words)
     }

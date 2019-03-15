@@ -27,7 +27,7 @@ impl<'a> internals::Case<'a> for SnakeCase<'a> {
     fn to_cased_words(self) -> Vec<Word<'a>> {
         match self.0 {
             CaseValue::Words(words) => words,
-            CaseValue::Joined(string) => string.split('_').map(|w| Word::LowerCase(w)).collect(),
+            CaseValue::Joined(string) => string.split('_').map(|w| Word::lower_case(w)).collect(),
         }
     }
 }
